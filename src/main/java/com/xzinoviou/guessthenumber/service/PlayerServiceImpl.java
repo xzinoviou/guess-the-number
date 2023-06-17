@@ -14,17 +14,17 @@ import java.util.ArrayList;
 @Component
 public class PlayerServiceImpl implements PlayerService{
 
-    private final DatabaseDao databaseData;
+    private final DatabaseDao databaseDao;
 
-    public PlayerServiceImpl(DatabaseDao databaseData) {
-        this.databaseData = databaseData;
+    public PlayerServiceImpl(DatabaseDao databaseDao) {
+        this.databaseDao = databaseDao;
     }
 
     @Override
     public Player create(PlayerCreateRequest playerCreateRequest) {
         try {
             Player player = Player.builder()
-                    .id(databaseData.getNextPlayerId())
+                    .id(databaseDao.getNextPlayerId())
                     .firstName(playerCreateRequest.getFirstName())
                     .lastName(playerCreateRequest.getLastName())
                     .dateOfBirth(playerCreateRequest.getDateOfBirth())
@@ -32,7 +32,7 @@ public class PlayerServiceImpl implements PlayerService{
                     .history(new ArrayList<>())
                     .build();
 
-            return databaseData.persistPlayer(player);
+            return databaseDao.persistPlayer(player);
         } catch (RuntimeException ex) {
             throw new RuntimeException("Failed to create player");
         }
@@ -52,7 +52,7 @@ public class PlayerServiceImpl implements PlayerService{
 
     @Override
     public Player getById(Integer id) {
-        return databaseData.getPlayers().stream().filter(p -> p.getId().equals(id)).findFirst()
+        return databaseDao.getPlayers().stream().filter(p -> p.getId().equals(id)).findFirst()
                 .orElseThrow(() -> new RuntimeException("Fail to retrieve player with id: " + id));
     }
 }
