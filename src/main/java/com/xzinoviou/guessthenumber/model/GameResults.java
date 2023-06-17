@@ -14,14 +14,17 @@ import java.util.List;
 @Builder
 @RequiredArgsConstructor
 @AllArgsConstructor
-public class Game {
+public class GameResults {
 
-    private Integer id;
-    private Integer playerId;
-    private Integer target;
+    private Integer gameId;
+
+    private String playerName;
+
     private Long totalScore;
+
     private GameStatus status;
+
     private GameMessage message;
+
     private Integer attempts;
-    private List<Guess> guesses;
 }

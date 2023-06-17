@@ -2,10 +2,7 @@ package com.xzinoviou.guessthenumber.service;
 
 import com.xzinoviou.guessthenumber.dao.DatabaseDao;
 import com.xzinoviou.guessthenumber.exception.GuessTheNumberException;
-import com.xzinoviou.guessthenumber.model.Game;
-import com.xzinoviou.guessthenumber.model.GameStatus;
-import com.xzinoviou.guessthenumber.model.Guess;
-import com.xzinoviou.guessthenumber.model.Player;
+import com.xzinoviou.guessthenumber.model.*;
 import com.xzinoviou.guessthenumber.request.GameCreateRequest;
 import com.xzinoviou.guessthenumber.request.GuessRequest;
 import org.springframework.stereotype.Component;
@@ -38,7 +35,8 @@ public class GameServiceImpl implements GameService {
                     .guesses(new ArrayList<>())
                     .target(randomTargetGenerator())
                     .totalScore(0L)
-                    .status(GameStatus.NOT_STARTED)
+                    .status(GameStatus.CREATED)
+                    .message(GameMessage.MAKE_A_GUESS)
                     .build();
 
             playerService.addGameToPlayer(gameCreateRequest.getPlayerId(), game);
@@ -53,6 +51,10 @@ public class GameServiceImpl implements GameService {
     public Game update(GuessRequest guessRequest) {
         try {
             Game game = getGameByIdAndPlayerId(guessRequest.getPlayerId(), guessRequest.getGameId());
+
+            if (game.getStatus() == GameStatus.FINISHED) {
+                throw new GuessTheNumberException("Game is already finished");
+            }
 
             Guess guess = Guess.builder()
                     .gameId(game.getId())
@@ -71,11 +73,14 @@ public class GameServiceImpl implements GameService {
             //set game status
 
             if (score == 10) {
-                game.setStatus(GameStatus.SUCCESS);
+                game.setMessage(GameMessage.SUCCESS);
+                game.setStatus(GameStatus.FINISHED);
             } else if (game.getAttempts() == attempt) {
-                game.setStatus(GameStatus.BETTER_LUCK_NEXT_TIME);
+                game.setMessage(GameMessage.GAME_OVER);
+                game.setStatus(GameStatus.FINISHED);
             } else {
-                game.setStatus(GameStatus.TRY_AGAIN);
+                game.setMessage(GameMessage.WRONG_GUESS_PLEASE_TRY_AGAIN);
+                game.setStatus(GameStatus.IN_PROGRESS);
             }
 
             game.getGuesses().add(guess);
@@ -87,15 +92,22 @@ public class GameServiceImpl implements GameService {
         }
     }
 
-    private Integer randomTargetGenerator() {
-        SecureRandom secureRandom = new SecureRandom();
-        return secureRandom.nextInt(100);
-    }
-
     public Game getGameByIdAndPlayerId(Integer playerId, Integer gameId) {
         Player player = playerService.getById(playerId);
 
         return player.getHistory().stream().filter(game -> game.getId().equals(gameId)).findFirst()
                 .orElseThrow(() -> new GuessTheNumberException("Fail to retrieve game with id: " + gameId));
     }
+
+    @Override
+    public Game getGameResultsById(Integer id) {
+        return null;
+    }
+
+    private Integer randomTargetGenerator() {
+        SecureRandom secureRandom = new SecureRandom();
+        return secureRandom.nextInt(100);
+    }
+
+
 }

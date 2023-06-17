@@ -12,4 +12,6 @@ public interface GameService {
     Game create(GameCreateRequest gameCreateRequest);
 
     Game update(GuessRequest guessRequest);
+
+    Game getGameResultsById(Integer id);
 }
