@@ -20,8 +20,7 @@ public class Game {
     private Integer playerId;
     private Integer target;
     private Long totalScore;
-    private GameStatus status;
-    private GameMessage message;
+    private GameStatusInfo statusInfo;
     private Integer attempts;
     private List<Guess> guesses;
 }

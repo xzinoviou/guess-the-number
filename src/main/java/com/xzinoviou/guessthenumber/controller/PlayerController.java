@@ -3,6 +3,8 @@ package com.xzinoviou.guessthenumber.controller;
 import com.xzinoviou.guessthenumber.model.Player;
 import com.xzinoviou.guessthenumber.request.PlayerCreateRequest;
 import com.xzinoviou.guessthenumber.service.PlayerService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -19,12 +21,12 @@ public class PlayerController {
     }
 
     @GetMapping("/{id}")
-    public Player getById(@PathVariable Integer id) {
-        return playerService.getById(id);
+    public ResponseEntity<Player> getById(@PathVariable Integer id) {
+        return ResponseEntity.ok(playerService.getById(id));
     }
 
     @PostMapping
-    public Player createPlayer(@RequestBody PlayerCreateRequest playerCreateRequest) {
-        return playerService.create(playerCreateRequest);
+    public ResponseEntity<Player> createPlayer(@RequestBody PlayerCreateRequest playerCreateRequest) {
+        return new ResponseEntity<>(playerService.create(playerCreateRequest), HttpStatus.CREATED);
     }
 }

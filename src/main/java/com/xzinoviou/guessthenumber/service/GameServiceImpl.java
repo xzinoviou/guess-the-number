@@ -2,10 +2,10 @@ package com.xzinoviou.guessthenumber.service;
 
 import com.xzinoviou.guessthenumber.dao.DatabaseDao;
 import com.xzinoviou.guessthenumber.dto.GameResultsDto;
+import com.xzinoviou.guessthenumber.dto.GameStatusInfoDto;
 import com.xzinoviou.guessthenumber.exception.GuessTheNumberException;
 import com.xzinoviou.guessthenumber.model.Game;
-import com.xzinoviou.guessthenumber.model.GameMessage;
-import com.xzinoviou.guessthenumber.model.GameStatus;
+import com.xzinoviou.guessthenumber.model.GameStatusInfo;
 import com.xzinoviou.guessthenumber.model.Guess;
 import com.xzinoviou.guessthenumber.request.GameCreateRequest;
 import com.xzinoviou.guessthenumber.request.GuessRequest;
@@ -30,7 +30,7 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public GameMessage create(GameCreateRequest gameCreateRequest) {
+    public GameStatusInfoDto create(GameCreateRequest gameCreateRequest) {
         try {
             Game game = Game.builder()
                     .id(databaseDao.getNextGameId())
@@ -39,27 +39,29 @@ public class GameServiceImpl implements GameService {
                     .guesses(new ArrayList<>())
                     .target(randomTargetGenerator())
                     .totalScore(0L)
-                    .status(GameStatus.CREATED)
-                    .message(GameMessage.GAME_CREATED_MAKE_A_GUESS)
+                    .statusInfo(GameStatusInfo.CREATED)
                     .build();
 
             playerService.addGameToPlayer(gameCreateRequest.getPlayerId(), game);
 
-            return game.getMessage();
+            return GameStatusInfoDto.builder()
+                    .status(game.getStatusInfo().getStatus())
+                    .message(game.getStatusInfo().getMessage())
+                    .build();
         } catch (RuntimeException ex) {
             throw new GuessTheNumberException("Fail to create game for player with id: " + gameCreateRequest.getPlayerId());
         }
     }
 
     @Override
-    public GameMessage update(GuessRequest guessRequest) {
+    public GameStatusInfoDto update(GuessRequest guessRequest) {
         Game game = getGameById(guessRequest.getGameId());
 
         if (!game.getPlayerId().equals(guessRequest.getPlayerId())) {
             throw new GuessTheNumberException("Failed to update game due to invalid data provided");
         }
 
-        if (game.getStatus() == GameStatus.FINISHED) {
+        if (game.getStatusInfo().isGameFinished()) {
             throw new GuessTheNumberException("Game is already finished");
         }
 
@@ -82,20 +84,20 @@ public class GameServiceImpl implements GameService {
             //set game status
 
             if (score == 10) {
-                game.setMessage(GameMessage.SUCCESS);
-                game.setStatus(GameStatus.FINISHED);
+                game.setStatusInfo(GameStatusInfo.WON);
             } else if (game.getAttempts() == attempt) {
-                game.setMessage(GameMessage.GAME_OVER);
-                game.setStatus(GameStatus.FINISHED);
+                game.setStatusInfo(GameStatusInfo.LOST);
             } else {
-                game.setMessage(GameMessage.WRONG_GUESS_PLEASE_TRY_AGAIN);
-                game.setStatus(GameStatus.IN_PROGRESS);
+                game.setStatusInfo(GameStatusInfo.IN_PROGRESS);
             }
 
             game.setTotalScore(game.getTotalScore() + score);
             game.getGuesses().add(guess);
 
-            return game.getMessage();
+            return GameStatusInfoDto.builder()
+                    .status(game.getStatusInfo().getStatus())
+                    .message(game.getStatusInfo().getMessage())
+                    .build();
 
         } catch (RuntimeException ex) {
             throw new GuessTheNumberException("Failed to update game for player with id: " + guessRequest.getPlayerId());
@@ -124,9 +126,13 @@ public class GameServiceImpl implements GameService {
                 .gameId(game.getId())
                 .playerId(game.getPlayerId())
                 .attempts(game.getGuesses().size() + 1)
-                .status(game.getStatus())
-                .message(game.getMessage())
                 .totalScore(game.getTotalScore())
+                .statusInfo(
+                        GameStatusInfoDto.builder()
+                                .status(game.getStatusInfo().getStatus())
+                                .message(game.getStatusInfo().getMessage())
+                                .build()
+                )
                 .build();
     }
 }
