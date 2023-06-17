@@ -9,5 +9,4 @@ import lombok.Getter;
 public class GameCreateRequest {
 
     private Integer playerId;
-    private Integer numberOfAttempts;
 }

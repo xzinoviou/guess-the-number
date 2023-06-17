@@ -19,6 +19,7 @@ import java.util.ArrayList;
 @Component
 public class GameServiceImpl implements GameService {
 
+    private final static Integer DEFAULT_GAME_GUESS_ATTEMPTS = 3;
     private final DatabaseDao databaseDao;
     private final PlayerServiceImpl playerService;
 
@@ -33,7 +34,7 @@ public class GameServiceImpl implements GameService {
             Game game = Game.builder()
                     .id(databaseDao.getNextGameId())
                     .playerId(gameCreateRequest.getPlayerId())
-                    .attempts(gameCreateRequest.getNumberOfAttempts())
+                    .attempts(DEFAULT_GAME_GUESS_ATTEMPTS)
                     .guesses(new ArrayList<>())
                     .target(randomTargetGenerator())
                     .totalScore(0L)
