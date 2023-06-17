@@ -92,6 +92,7 @@ public class GameServiceImpl implements GameService {
                 game.setStatus(GameStatus.IN_PROGRESS);
             }
 
+            game.setTotalScore(game.getTotalScore() + score);
             game.getGuesses().add(guess);
 
             return game.getMessage();
@@ -122,7 +123,7 @@ public class GameServiceImpl implements GameService {
         return GameResultsDto.builder()
                 .gameId(game.getId())
                 .playerId(game.getPlayerId())
-                .attempts(game.getAttempts())
+                .attempts(game.getGuesses().size() + 1)
                 .status(game.getStatus())
                 .message(game.getMessage())
                 .totalScore(game.getTotalScore())
