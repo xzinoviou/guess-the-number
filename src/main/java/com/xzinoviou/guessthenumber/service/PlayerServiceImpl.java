@@ -1,6 +1,7 @@
 package com.xzinoviou.guessthenumber.service;
 
 import com.xzinoviou.guessthenumber.dao.DatabaseDao;
+import com.xzinoviou.guessthenumber.exception.GuessTheNumberException;
 import com.xzinoviou.guessthenumber.model.Game;
 import com.xzinoviou.guessthenumber.model.Player;
 import com.xzinoviou.guessthenumber.request.PlayerCreateRequest;
@@ -34,25 +35,26 @@ public class PlayerServiceImpl implements PlayerService{
 
             return databaseDao.persistPlayer(player);
         } catch (RuntimeException ex) {
-            throw new RuntimeException("Failed to create player");
+            throw new GuessTheNumberException("Failed to create player");
         }
     }
 
     @Override
     public Player addGameToPlayer(Integer playerId, Game game) {
+        Player player = getById(playerId);
+
         try {
-            Player player = getById(playerId);
             player.getHistory().add(game);
 
             return player;
         } catch (RuntimeException ex) {
-            throw new RuntimeException("Fail to add new game to player with id: " + playerId);
+            throw new GuessTheNumberException("Fail to add new game to player with id: " + playerId);
         }
     }
 
     @Override
     public Player getById(Integer id) {
         return databaseDao.getPlayers().stream().filter(p -> p.getId().equals(id)).findFirst()
-                .orElseThrow(() -> new RuntimeException("Fail to retrieve player with id: " + id));
+                .orElseThrow(() -> new GuessTheNumberException("Fail to retrieve player with id: " + id));
     }
 }

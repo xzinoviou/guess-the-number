@@ -1,6 +1,7 @@
 package com.xzinoviou.guessthenumber.service;
 
 import com.xzinoviou.guessthenumber.dao.DatabaseDao;
+import com.xzinoviou.guessthenumber.exception.GuessTheNumberException;
 import com.xzinoviou.guessthenumber.model.Game;
 import com.xzinoviou.guessthenumber.model.GameStatus;
 import com.xzinoviou.guessthenumber.model.Guess;
@@ -43,7 +44,7 @@ public class GameServiceImpl implements GameService {
 
             return game;
         } catch (RuntimeException ex) {
-            throw new RuntimeException("Fail to create game for player with id: " + gameCreateRequest.getPlayerId());
+            throw new GuessTheNumberException("Fail to create game for player with id: " + gameCreateRequest.getPlayerId());
         }
     }
 
@@ -68,9 +69,9 @@ public class GameServiceImpl implements GameService {
 
             //set game status
 
-            if(score == 10){
+            if (score == 10) {
                 game.setStatus(GameStatus.SUCCESS);
-            } else if(game.getAttempts() == attempt) {
+            } else if (game.getAttempts() == attempt) {
                 game.setStatus(GameStatus.BETTER_LUCK_NEXT_TIME);
             } else {
                 game.setStatus(GameStatus.TRY_AGAIN);
@@ -81,7 +82,7 @@ public class GameServiceImpl implements GameService {
             return game;
 
         } catch (RuntimeException ex) {
-            throw new RuntimeException("Fail to update game for player with id: " + guessRequest.getPlayerId());
+            throw new GuessTheNumberException("Fail to update game for player with id: " + guessRequest.getPlayerId());
         }
     }
 
@@ -91,14 +92,9 @@ public class GameServiceImpl implements GameService {
     }
 
     public Game getGameByIdAndPlayerId(Integer playerId, Integer gameId) {
-        try {
-            Player player = playerService.getById(playerId);
+        Player player = playerService.getById(playerId);
 
-            return player.getHistory().stream().filter(game -> game.getId().equals(gameId)).findFirst()
-                    .orElseThrow(() -> new RuntimeException("Fail to retrieve game with id: " + gameId));
-
-        } catch (RuntimeException ex) {
-            throw new RuntimeException("Fail to retrieve game with id: " + gameId + " from player with id: " + playerId);
-        }
+        return player.getHistory().stream().filter(game -> game.getId().equals(gameId)).findFirst()
+                .orElseThrow(() -> new GuessTheNumberException("Fail to retrieve game with id: " + gameId));
     }
 }
