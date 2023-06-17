@@ -1,2 +1,3 @@
 # guess-the-number
-Simple API for needs of testing.
+Simple API, purposefully containing bugs, 
+to cover the needs of testing & discover its value as a development tool.
