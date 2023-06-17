@@ -48,13 +48,13 @@ public class PlayerServiceImpl implements PlayerService{
 
             return player;
         } catch (RuntimeException ex) {
-            throw new GuessTheNumberException("Fail to add new game to player with id: " + playerId);
+            throw new GuessTheNumberException("Failed to add new game to player with id: " + playerId);
         }
     }
 
     @Override
     public Player getById(Integer id) {
         return databaseDao.getPlayers().stream().filter(p -> p.getId().equals(id)).findFirst()
-                .orElseThrow(() -> new GuessTheNumberException("Fail to retrieve player with id: " + id));
+                .orElseThrow(() -> new GuessTheNumberException("Failed to retrieve player with id: " + id));
     }
 }

@@ -1,11 +1,11 @@
-package com.xzinoviou.guessthenumber.model;
+package com.xzinoviou.guessthenumber.dto;
 
+import com.xzinoviou.guessthenumber.model.GameMessage;
+import com.xzinoviou.guessthenumber.model.GameStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
-
-import java.util.List;
 
 /**
  * @author : Xenofon Zinoviou
@@ -14,11 +14,11 @@ import java.util.List;
 @Builder
 @RequiredArgsConstructor
 @AllArgsConstructor
-public class GameResults {
+public class GameResultsDto {
 
     private Integer gameId;
 
-    private String playerName;
+    private Integer playerId;
 
     private Long totalScore;
 

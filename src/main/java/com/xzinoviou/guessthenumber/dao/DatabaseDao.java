@@ -1,10 +1,13 @@
 package com.xzinoviou.guessthenumber.dao;
 
+import com.xzinoviou.guessthenumber.model.Game;
 import com.xzinoviou.guessthenumber.model.Player;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author : Xenofon Zinoviou
@@ -19,6 +22,10 @@ public class DatabaseDao {
 
     public List<Player> getPlayers() {
         return PLAYERS != null ? PLAYERS : new ArrayList<>();
+    }
+
+    public List<Game> getGames() {
+        return getPlayers().stream().map(Player::getHistory).flatMap(Collection::stream).toList();
     }
 
     public Player persistPlayer(Player player) {

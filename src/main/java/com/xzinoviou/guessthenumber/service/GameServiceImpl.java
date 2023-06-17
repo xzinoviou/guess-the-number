@@ -1,8 +1,12 @@
 package com.xzinoviou.guessthenumber.service;
 
 import com.xzinoviou.guessthenumber.dao.DatabaseDao;
+import com.xzinoviou.guessthenumber.dto.GameResultsDto;
 import com.xzinoviou.guessthenumber.exception.GuessTheNumberException;
-import com.xzinoviou.guessthenumber.model.*;
+import com.xzinoviou.guessthenumber.model.Game;
+import com.xzinoviou.guessthenumber.model.GameMessage;
+import com.xzinoviou.guessthenumber.model.GameStatus;
+import com.xzinoviou.guessthenumber.model.Guess;
 import com.xzinoviou.guessthenumber.request.GameCreateRequest;
 import com.xzinoviou.guessthenumber.request.GuessRequest;
 import org.springframework.stereotype.Component;
@@ -16,7 +20,7 @@ import java.util.ArrayList;
 @Component
 public class GameServiceImpl implements GameService {
 
-    private final static Integer DEFAULT_GAME_GUESS_ATTEMPTS = 3;
+    private static final Integer DEFAULT_GAME_GUESS_ATTEMPTS = 3;
     private final DatabaseDao databaseDao;
     private final PlayerServiceImpl playerService;
 
@@ -26,7 +30,7 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public Game create(GameCreateRequest gameCreateRequest) {
+    public GameMessage create(GameCreateRequest gameCreateRequest) {
         try {
             Game game = Game.builder()
                     .id(databaseDao.getNextGameId())
@@ -36,25 +40,30 @@ public class GameServiceImpl implements GameService {
                     .target(randomTargetGenerator())
                     .totalScore(0L)
                     .status(GameStatus.CREATED)
-                    .message(GameMessage.MAKE_A_GUESS)
+                    .message(GameMessage.GAME_CREATED_MAKE_A_GUESS)
                     .build();
 
             playerService.addGameToPlayer(gameCreateRequest.getPlayerId(), game);
 
-            return game;
+            return game.getMessage();
         } catch (RuntimeException ex) {
             throw new GuessTheNumberException("Fail to create game for player with id: " + gameCreateRequest.getPlayerId());
         }
     }
 
     @Override
-    public Game update(GuessRequest guessRequest) {
-        try {
-            Game game = getGameByIdAndPlayerId(guessRequest.getPlayerId(), guessRequest.getGameId());
+    public GameMessage update(GuessRequest guessRequest) {
+        Game game = getGameById(guessRequest.getGameId());
 
-            if (game.getStatus() == GameStatus.FINISHED) {
-                throw new GuessTheNumberException("Game is already finished");
-            }
+        if (!game.getPlayerId().equals(guessRequest.getPlayerId())) {
+            throw new GuessTheNumberException("Failed to update game due to invalid data provided");
+        }
+
+        if (game.getStatus() == GameStatus.FINISHED) {
+            throw new GuessTheNumberException("Game is already finished");
+        }
+
+        try {
 
             Guess guess = Guess.builder()
                     .gameId(game.getId())
@@ -85,23 +94,23 @@ public class GameServiceImpl implements GameService {
 
             game.getGuesses().add(guess);
 
-            return game;
+            return game.getMessage();
 
         } catch (RuntimeException ex) {
-            throw new GuessTheNumberException("Fail to update game for player with id: " + guessRequest.getPlayerId());
+            throw new GuessTheNumberException("Failed to update game for player with id: " + guessRequest.getPlayerId());
         }
     }
 
-    public Game getGameByIdAndPlayerId(Integer playerId, Integer gameId) {
-        Player player = playerService.getById(playerId);
+    @Override
+    public GameResultsDto getGameResultsById(Integer id) {
+        Game game = getGameById(id);
 
-        return player.getHistory().stream().filter(game -> game.getId().equals(gameId)).findFirst()
-                .orElseThrow(() -> new GuessTheNumberException("Fail to retrieve game with id: " + gameId));
+        return mapToGameResultsDto(game);
     }
 
-    @Override
-    public Game getGameResultsById(Integer id) {
-        return null;
+    private Game getGameById(Integer id) {
+        return databaseDao.getGames().stream().filter(game -> game.getId().equals(id)).findFirst()
+                .orElseThrow(() -> new GuessTheNumberException("Failed to retrieve game with id: " + id));
     }
 
     private Integer randomTargetGenerator() {
@@ -109,5 +118,14 @@ public class GameServiceImpl implements GameService {
         return secureRandom.nextInt(100);
     }
 
-
+    private GameResultsDto mapToGameResultsDto(Game game) {
+        return GameResultsDto.builder()
+                .gameId(game.getId())
+                .playerId(game.getPlayerId())
+                .attempts(game.getAttempts())
+                .status(game.getStatus())
+                .message(game.getMessage())
+                .totalScore(game.getTotalScore())
+                .build();
+    }
 }
