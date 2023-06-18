@@ -1,7 +1,7 @@
 package com.xzinoviou.guessthenumber.service;
 
-import com.xzinoviou.guessthenumber.dto.GameStatusInfoDto;
-import com.xzinoviou.guessthenumber.dto.GameResultsDto;
+import com.xzinoviou.guessthenumber.dto.game.GameStatusInfoDto;
+import com.xzinoviou.guessthenumber.model.Game;
 import com.xzinoviou.guessthenumber.request.GameCreateRequest;
 import com.xzinoviou.guessthenumber.request.GuessRequest;
 
@@ -14,5 +14,5 @@ public interface GameService {
 
     GameStatusInfoDto update(GuessRequest guessRequest);
 
-    GameResultsDto getGameResultsById(Integer id);
+    Game getById(Integer id);
 }

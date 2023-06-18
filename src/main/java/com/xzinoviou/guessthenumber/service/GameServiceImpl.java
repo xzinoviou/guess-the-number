@@ -1,23 +1,26 @@
 package com.xzinoviou.guessthenumber.service;
 
 import com.xzinoviou.guessthenumber.dao.DatabaseDao;
-import com.xzinoviou.guessthenumber.dto.GameResultsDto;
-import com.xzinoviou.guessthenumber.dto.GameStatusInfoDto;
+import com.xzinoviou.guessthenumber.dto.results.GameResultsDto;
+import com.xzinoviou.guessthenumber.dto.game.GameStatusInfoDto;
 import com.xzinoviou.guessthenumber.exception.GuessTheNumberException;
 import com.xzinoviou.guessthenumber.model.Game;
 import com.xzinoviou.guessthenumber.model.GameStatusInfo;
 import com.xzinoviou.guessthenumber.model.Guess;
+import com.xzinoviou.guessthenumber.model.Player;
 import com.xzinoviou.guessthenumber.request.GameCreateRequest;
 import com.xzinoviou.guessthenumber.request.GuessRequest;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author : Xenofon Zinoviou
  */
-@Component
+@Service
 public class GameServiceImpl implements GameService {
 
     private static final Integer DEFAULT_GAME_GUESS_ATTEMPTS = 3;
@@ -55,7 +58,7 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public GameStatusInfoDto update(GuessRequest guessRequest) {
-        Game game = getGameById(guessRequest.getGameId());
+        Game game = getById(guessRequest.getGameId());
 
         if (!game.getPlayerId().equals(guessRequest.getPlayerId())) {
             throw new GuessTheNumberException("Failed to update game due to invalid data provided");
@@ -104,14 +107,7 @@ public class GameServiceImpl implements GameService {
         }
     }
 
-    @Override
-    public GameResultsDto getGameResultsById(Integer id) {
-        Game game = getGameById(id);
-
-        return mapToGameResultsDto(game);
-    }
-
-    private Game getGameById(Integer id) {
+    public Game getById(Integer id) {
         return databaseDao.getGames().stream().filter(game -> game.getId().equals(id)).findFirst()
                 .orElseThrow(() -> new GuessTheNumberException("Failed to retrieve game with id: " + id));
     }

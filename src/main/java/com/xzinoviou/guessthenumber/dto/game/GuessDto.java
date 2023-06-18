@@ -1,4 +1,4 @@
-package com.xzinoviou.guessthenumber.dto;
+package com.xzinoviou.guessthenumber.dto.game;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

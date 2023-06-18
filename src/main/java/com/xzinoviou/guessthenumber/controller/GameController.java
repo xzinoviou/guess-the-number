@@ -1,16 +1,12 @@
 package com.xzinoviou.guessthenumber.controller;
 
-import com.xzinoviou.guessthenumber.dto.GameStatusInfoDto;
-import com.xzinoviou.guessthenumber.dto.GameResultsDto;
+import com.xzinoviou.guessthenumber.dto.game.GameStatusInfoDto;
 import com.xzinoviou.guessthenumber.request.GameCreateRequest;
-import com.xzinoviou.guessthenumber.service.GameService;
 import com.xzinoviou.guessthenumber.request.GuessRequest;
+import com.xzinoviou.guessthenumber.service.GameService;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 /**
  * @author : Xenofon Zinoviou
@@ -27,16 +23,11 @@ public class GameController {
 
     @PostMapping
     public ResponseEntity<GameStatusInfoDto> create(@RequestBody GameCreateRequest gameCreateRequest) {
-        return ResponseEntity.ok(gameService.create(gameCreateRequest));
+        return new ResponseEntity<>(gameService.create(gameCreateRequest), HttpStatus.CREATED);
     }
 
     @PostMapping("/update")
     public ResponseEntity<GameStatusInfoDto> update(@RequestBody GuessRequest guessRequest) {
         return new ResponseEntity<>(gameService.update(guessRequest), HttpStatus.OK);
-    }
-
-    @GetMapping("/results/{id}")
-    public ResponseEntity<GameResultsDto> getGameResultsById(@PathVariable("id") Integer id) {
-        return ResponseEntity.ok(gameService.getGameResultsById(id));
     }
 }

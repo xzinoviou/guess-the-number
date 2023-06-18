@@ -5,15 +5,16 @@ import com.xzinoviou.guessthenumber.exception.GuessTheNumberException;
 import com.xzinoviou.guessthenumber.model.Game;
 import com.xzinoviou.guessthenumber.model.Player;
 import com.xzinoviou.guessthenumber.request.PlayerCreateRequest;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author : Xenofon Zinoviou
  */
-@Component
-public class PlayerServiceImpl implements PlayerService{
+@Service
+public class PlayerServiceImpl implements PlayerService {
 
     private final DatabaseDao databaseDao;
 
@@ -45,6 +46,7 @@ public class PlayerServiceImpl implements PlayerService{
 
         try {
             player.getHistory().add(game);
+            player.setTotalGames(player.getHistory().size());
 
             return player;
         } catch (RuntimeException ex) {
@@ -56,5 +58,10 @@ public class PlayerServiceImpl implements PlayerService{
     public Player getById(Integer id) {
         return databaseDao.getPlayers().stream().filter(p -> p.getId().equals(id)).findFirst()
                 .orElseThrow(() -> new GuessTheNumberException("Failed to retrieve player with id: " + id));
+    }
+
+    @Override
+    public List<Player> getAllPlayers() {
+        return databaseDao.getPlayers();
     }
 }
