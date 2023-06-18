@@ -3,7 +3,7 @@ package com.xzinoviou.guessthenumber.model;
 /**
  * @author : Xenofon Zinoviou
  */
-public enum GameStatusInfo {
+public enum GameStatus {
     CREATED("Created", "Make a guess"),
     IN_PROGRESS("In progress", "Wrong Guess. Please try again"),
     WON("Won", "Success, you win!!"),
@@ -12,7 +12,7 @@ public enum GameStatusInfo {
     private final String status;
     private final String message;
 
-    GameStatusInfo(String status, String message) {
+    GameStatus(String status, String message) {
         this.status = status;
         this.message = message;
     }

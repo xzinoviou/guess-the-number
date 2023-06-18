@@ -1,11 +1,11 @@
 package com.xzinoviou.guessthenumber.service;
 
-import com.xzinoviou.guessthenumber.dto.game.GameStatusInfoDto;
+import com.xzinoviou.guessthenumber.dto.game.GameStatusDto;
 import com.xzinoviou.guessthenumber.dto.results.GameResultsDto;
 import com.xzinoviou.guessthenumber.dto.results.PlayerResultsDto;
 import com.xzinoviou.guessthenumber.dto.results.TotalResultsDto;
 import com.xzinoviou.guessthenumber.model.Game;
-import com.xzinoviou.guessthenumber.model.GameStatusInfo;
+import com.xzinoviou.guessthenumber.model.GameStatus;
 import com.xzinoviou.guessthenumber.model.Player;
 import org.springframework.stereotype.Service;
 
@@ -28,14 +28,14 @@ public class ResultsServiceImpl implements ResultsService {
     }
 
     @Override
-    public GameResultsDto getGameResultsById(Integer id) {
+    public GameResultsDto getGameResultsByGameId(Integer id) {
         Game game = gameService.getById(id);
 
         return mapToGameResultsDto(game);
     }
 
     @Override
-    public PlayerResultsDto getPlayerResultsById(Integer playerId) {
+    public PlayerResultsDto getPlayerResultsByPlayerId(Integer playerId) {
         Player player = playerService.getById(playerId);
 
         return mapToPlayerResultsDto(player);
@@ -58,7 +58,7 @@ public class ResultsServiceImpl implements ResultsService {
                 .attempts(game.getGuesses().size())
                 .totalScore(game.getTotalScore())
                 .statusInfo(
-                        GameStatusInfoDto.builder()
+                        GameStatusDto.builder()
                                 .status(game.getStatusInfo().getStatus())
                                 .message(game.getStatusInfo().getMessage())
                                 .build()
@@ -67,8 +67,8 @@ public class ResultsServiceImpl implements ResultsService {
     }
 
     private PlayerResultsDto mapToPlayerResultsDto(Player player) {
-        Integer won = Math.toIntExact(player.getHistory().stream().filter(game -> game.getStatusInfo() == GameStatusInfo.WON).count());
-        Integer lost = Math.toIntExact(player.getHistory().stream().filter(game -> game.getStatusInfo() == GameStatusInfo.LOST).count());
+        Integer won = Math.toIntExact(player.getHistory().stream().filter(game -> game.getStatusInfo() == GameStatus.WON).count());
+        Integer lost = Math.toIntExact(player.getHistory().stream().filter(game -> game.getStatusInfo() == GameStatus.LOST).count());
         BigDecimal avgWinRatio = BigDecimal.valueOf(won / (double) player.getTotalGames());
 
         long totalScore = player.getHistory().stream().map(Game::getTotalScore).mapToLong(Long::longValue).sum();

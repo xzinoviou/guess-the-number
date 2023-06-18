@@ -25,12 +25,12 @@ public class ResultsController {
 
     @GetMapping("/games/{id}")
     public ResponseEntity<GameResultsDto> getGameResultsById(@PathVariable("id") Integer id) {
-        return ResponseEntity.ok(resultsService.getGameResultsById(id));
+        return ResponseEntity.ok(resultsService.getGameResultsByGameId(id));
     }
 
     @GetMapping("/players/{id}")
     public ResponseEntity<PlayerResultsDto> getPlayerResultsById(@PathVariable("id") Integer id) {
-        return ResponseEntity.ok(resultsService.getPlayerResultsById(id));
+        return ResponseEntity.ok(resultsService.getPlayerResultsByPlayerId(id));
     }
 
     @GetMapping("/players")

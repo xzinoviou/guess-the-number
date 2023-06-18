@@ -9,9 +9,9 @@ import com.xzinoviou.guessthenumber.dto.results.TotalResultsDto;
  */
 public interface ResultsService {
 
-    GameResultsDto getGameResultsById(Integer id);
+    GameResultsDto getGameResultsByGameId(Integer id);
 
-    PlayerResultsDto getPlayerResultsById(Integer playerId);
+    PlayerResultsDto getPlayerResultsByPlayerId(Integer playerId);
 
     TotalResultsDto getPlayersTotalResultsRanking();
 }

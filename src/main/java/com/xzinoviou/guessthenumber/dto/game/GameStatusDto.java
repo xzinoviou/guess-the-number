@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class GameStatusInfoDto {
+public class GameStatusDto {
 
     private String status;
     private String message;

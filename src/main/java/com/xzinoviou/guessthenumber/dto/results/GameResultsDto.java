@@ -1,6 +1,6 @@
 package com.xzinoviou.guessthenumber.dto.results;
 
-import com.xzinoviou.guessthenumber.dto.game.GameStatusInfoDto;
+import com.xzinoviou.guessthenumber.dto.game.GameStatusDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,5 +23,5 @@ public class GameResultsDto {
 
     private Integer attempts;
 
-    private GameStatusInfoDto statusInfo;
+    private GameStatusDto statusInfo;
 }

@@ -1,21 +1,17 @@
 package com.xzinoviou.guessthenumber.service;
 
 import com.xzinoviou.guessthenumber.dao.DatabaseDao;
-import com.xzinoviou.guessthenumber.dto.results.GameResultsDto;
-import com.xzinoviou.guessthenumber.dto.game.GameStatusInfoDto;
+import com.xzinoviou.guessthenumber.dto.game.GameStatusDto;
 import com.xzinoviou.guessthenumber.exception.GuessTheNumberException;
 import com.xzinoviou.guessthenumber.model.Game;
-import com.xzinoviou.guessthenumber.model.GameStatusInfo;
+import com.xzinoviou.guessthenumber.model.GameStatus;
 import com.xzinoviou.guessthenumber.model.Guess;
-import com.xzinoviou.guessthenumber.model.Player;
 import com.xzinoviou.guessthenumber.request.GameCreateRequest;
 import com.xzinoviou.guessthenumber.request.GuessRequest;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * @author : Xenofon Zinoviou
@@ -33,7 +29,7 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public GameStatusInfoDto create(GameCreateRequest gameCreateRequest) {
+    public GameStatusDto create(GameCreateRequest gameCreateRequest) {
         try {
             Game game = Game.builder()
                     .id(databaseDao.getNextGameId())
@@ -42,12 +38,12 @@ public class GameServiceImpl implements GameService {
                     .guesses(new ArrayList<>())
                     .target(randomTargetGenerator())
                     .totalScore(0L)
-                    .statusInfo(GameStatusInfo.CREATED)
+                    .statusInfo(GameStatus.CREATED)
                     .build();
 
             playerService.addGameToPlayer(gameCreateRequest.getPlayerId(), game);
 
-            return GameStatusInfoDto.builder()
+            return GameStatusDto.builder()
                     .status(game.getStatusInfo().getStatus())
                     .message(game.getStatusInfo().getMessage())
                     .build();
@@ -57,7 +53,7 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public GameStatusInfoDto update(GuessRequest guessRequest) {
+    public GameStatusDto guess(GuessRequest guessRequest) {
         Game game = getById(guessRequest.getGameId());
 
         if (!game.getPlayerId().equals(guessRequest.getPlayerId())) {
@@ -87,17 +83,17 @@ public class GameServiceImpl implements GameService {
             //set game status
 
             if (score == 10) {
-                game.setStatusInfo(GameStatusInfo.WON);
+                game.setStatusInfo(GameStatus.WON);
             } else if (game.getAttempts() == attempt) {
-                game.setStatusInfo(GameStatusInfo.LOST);
+                game.setStatusInfo(GameStatus.LOST);
             } else {
-                game.setStatusInfo(GameStatusInfo.IN_PROGRESS);
+                game.setStatusInfo(GameStatus.IN_PROGRESS);
             }
 
             game.setTotalScore(game.getTotalScore() + score);
             game.getGuesses().add(guess);
 
-            return GameStatusInfoDto.builder()
+            return GameStatusDto.builder()
                     .status(game.getStatusInfo().getStatus())
                     .message(game.getStatusInfo().getMessage())
                     .build();
@@ -115,20 +111,5 @@ public class GameServiceImpl implements GameService {
     private Integer randomTargetGenerator() {
         SecureRandom secureRandom = new SecureRandom();
         return secureRandom.nextInt(100);
-    }
-
-    private GameResultsDto mapToGameResultsDto(Game game) {
-        return GameResultsDto.builder()
-                .gameId(game.getId())
-                .playerId(game.getPlayerId())
-                .attempts(game.getGuesses().size() + 1)
-                .totalScore(game.getTotalScore())
-                .statusInfo(
-                        GameStatusInfoDto.builder()
-                                .status(game.getStatusInfo().getStatus())
-                                .message(game.getStatusInfo().getMessage())
-                                .build()
-                )
-                .build();
     }
 }

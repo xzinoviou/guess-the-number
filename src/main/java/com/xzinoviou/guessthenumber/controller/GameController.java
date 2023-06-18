@@ -1,6 +1,6 @@
 package com.xzinoviou.guessthenumber.controller;
 
-import com.xzinoviou.guessthenumber.dto.game.GameStatusInfoDto;
+import com.xzinoviou.guessthenumber.dto.game.GameStatusDto;
 import com.xzinoviou.guessthenumber.request.GameCreateRequest;
 import com.xzinoviou.guessthenumber.request.GuessRequest;
 import com.xzinoviou.guessthenumber.service.GameService;
@@ -22,12 +22,12 @@ public class GameController {
     }
 
     @PostMapping
-    public ResponseEntity<GameStatusInfoDto> create(@RequestBody GameCreateRequest gameCreateRequest) {
+    public ResponseEntity<GameStatusDto> create(@RequestBody GameCreateRequest gameCreateRequest) {
         return new ResponseEntity<>(gameService.create(gameCreateRequest), HttpStatus.CREATED);
     }
 
-    @PostMapping("/update")
-    public ResponseEntity<GameStatusInfoDto> update(@RequestBody GuessRequest guessRequest) {
-        return new ResponseEntity<>(gameService.update(guessRequest), HttpStatus.OK);
+    @PostMapping("/guess")
+    public ResponseEntity<GameStatusDto> guess(@RequestBody GuessRequest guessRequest) {
+        return new ResponseEntity<>(gameService.guess(guessRequest), HttpStatus.OK);
     }
 }
