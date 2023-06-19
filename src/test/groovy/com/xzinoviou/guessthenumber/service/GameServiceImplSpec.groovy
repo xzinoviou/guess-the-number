@@ -62,13 +62,13 @@ class GameServiceImplSpec extends Specification {
         def request = new GameCreateRequest(playerId: playerId)
 
         and: "next game id allocation fails"
-        databaseDaoMock.getNextGameId() >> new RuntimeException("fail to allocate next game id")
+        databaseDaoMock.getNextGameId() >> { new RuntimeException("fail to allocate next game id") }
 
         when: "a call to create a game is made"
-        def ex = testClass.create(request)
+        testClass.create(request)
 
         then: "it should throw a GuessTheNumber exception"
-        ex = thrown(GuessTheNumberException)
+        def ex = thrown(GuessTheNumberException)
         ex.message == "Fail to create game for player with id: " + playerId
 
     }
@@ -83,14 +83,45 @@ class GameServiceImplSpec extends Specification {
         databaseDaoMock.getNextGameId() >> gameId
 
         and: "adding game to player fails"
-        playerServiceMock.addGameToPlayer((Integer) _, (Game) _) >> new RuntimeException("fail to add game to player")
+        playerServiceMock.addGameToPlayer((Integer) _, (Game) _) >> { new RuntimeException("fail to add game to player") }
 
         when: "a call to create a game is made"
-        def ex = testClass.create(request)
+        testClass.create(request)
 
         then: "it should throw a GuessTheNumber exception"
-        ex = thrown(GuessTheNumberException)
+        def ex = thrown(GuessTheNumberException)
         ex.message == "Fail to create game for player with id: " + playerId
+
+    }
+
+    def "getById - when request an existing game by id then return game"() {
+        given: "an existing game id"
+        def gameId = 1;
+
+        and: "game retrieval succeeds"
+        databaseDaoMock.getGames() >> [new Game(id: 3), new Game(id: 4), new Game(id: 1)]
+
+        when: "a request to retrieve the game by the id"
+        def result = testClass.getById(gameId)
+
+        then: "the game retrieved should match the id"
+        result.id == 1
+
+    }
+
+    def "getById - when requesting a non-existing game by id then throw GuessTheNumberException"() {
+        given: "an existing game id"
+        def gameId = 1;
+
+        and: "game retrieval succeeds"
+        databaseDaoMock.getGames() >> [new Game(id: 3), new Game(id: 4), new Game(id: 11)]
+
+        when: "a request to retrieve the game by the id"
+        testClass.getById(gameId)
+
+        then: "the game retrieved should match the id"
+        def ex = thrown(GuessTheNumberException)
+        ex.message == "Failed to retrieve game with id: " + gameId
 
     }
 }
