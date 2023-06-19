@@ -1,4 +1,4 @@
-package com.xzinoviou.guessthenumber;
+package com.xzinoviou.guessthenumber.error;
 
 import lombok.Builder;
 import lombok.Getter;

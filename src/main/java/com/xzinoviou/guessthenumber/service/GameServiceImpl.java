@@ -21,7 +21,7 @@ public class GameServiceImpl implements GameService {
 
     private static final Integer DEFAULT_GAME_GUESS_ATTEMPTS = 3;
     private final DatabaseDao databaseDao;
-    private final PlayerServiceImpl playerService;
+    private final PlayerService playerService;
 
     public GameServiceImpl(DatabaseDao databaseDao, PlayerServiceImpl playerService) {
         this.databaseDao = databaseDao;
@@ -31,8 +31,10 @@ public class GameServiceImpl implements GameService {
     @Override
     public GameStatusDto create(GameCreateRequest gameCreateRequest) {
         try {
+            int gameId = databaseDao.getNextGameId();
+
             Game game = Game.builder()
-                    .id(databaseDao.getNextGameId())
+                    .id(gameId)
                     .playerId(gameCreateRequest.getPlayerId())
                     .attempts(DEFAULT_GAME_GUESS_ATTEMPTS)
                     .guesses(new ArrayList<>())

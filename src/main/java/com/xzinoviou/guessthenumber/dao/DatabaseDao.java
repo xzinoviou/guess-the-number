@@ -17,8 +17,8 @@ public class DatabaseDao {
 
     private static final List<Player> PLAYERS = new ArrayList<>();
 
-    private static int PLAYER_ID_SEQUENCER;
-    private static int GAME_ID_SEQUENCER;
+    private int PLAYER_ID_SEQUENCER;
+    private int GAME_ID_SEQUENCER;
 
     public List<Player> getPlayers() {
         return PLAYERS != null ? PLAYERS : new ArrayList<>();

@@ -1,6 +1,6 @@
 package com.xzinoviou.guessthenumber.exception;
 
-import com.xzinoviou.guessthenumber.AppError;
+import com.xzinoviou.guessthenumber.error.AppError;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
