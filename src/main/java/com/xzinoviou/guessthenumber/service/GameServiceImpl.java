@@ -87,7 +87,7 @@ public class GameServiceImpl implements GameService {
 
             if (score == 10) {
                 game.setStatusInfo(GameStatus.WON);
-            } else if (game.getAttempts() == attempt) {
+            } else if (game.getAttempts().intValue() == DEFAULT_GAME_GUESS_ATTEMPTS) {
                 game.setStatusInfo(GameStatus.LOST);
             } else {
                 game.setStatusInfo(GameStatus.IN_PROGRESS);
