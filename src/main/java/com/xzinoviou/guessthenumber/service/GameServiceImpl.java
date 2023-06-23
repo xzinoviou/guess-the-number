@@ -81,6 +81,7 @@ public class GameServiceImpl implements GameService {
             //find previous attempt number + increase by 1
             int attempt = game.getGuesses().size() + 1;
             guess.setAttempt(attempt);
+            game.setAttempts(attempt);
 
             //set game status
 
