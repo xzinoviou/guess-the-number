@@ -14,21 +14,21 @@ import spock.lang.Specification
  */
 class GameServiceImplSpec extends Specification {
 
-    private DatabaseDao databaseDaoMock
-    private PlayerService playerServiceMock
+    private DatabaseDao databaseDao
+    private PlayerService playerService
     private GameServiceImpl testClass
 
 
     void setup() {
-        databaseDaoMock = Mock()
-        playerServiceMock = Mock(PlayerServiceImpl)
-        testClass = new GameServiceImpl(databaseDaoMock, playerServiceMock)
+        databaseDao = Mock()
+        playerService = Mock(PlayerServiceImpl)
+        testClass = new GameServiceImpl(databaseDao, playerService)
     }
 
     void cleanup() {
         testClass = null
-        databaseDaoMock = null
-        playerServiceMock = null
+        databaseDao = null
+        playerService = null
     }
 
     def "create - when a game is created successfully then return game status created"() {
@@ -38,7 +38,7 @@ class GameServiceImplSpec extends Specification {
         def request = new GameCreateRequest(playerId: playerId)
 
         and: "an id for the next game is allocated by the database"
-        databaseDaoMock.getNextGameId() >> gameId
+        databaseDao.getNextGameId() >> gameId
 
         when: "a call to create a game is made"
         def result = testClass.create(request)
@@ -46,7 +46,7 @@ class GameServiceImplSpec extends Specification {
         then: "it should return a game status of created"
         result.message == GameStatus.CREATED.message
         result.status == GameStatus.CREATED.status
-        1 * playerServiceMock.addGameToPlayer(id -> {
+        1 * playerService.addGameToPlayer(id -> {
             id == playerId
         }, game -> {
             game.id == gameId
@@ -64,7 +64,7 @@ class GameServiceImplSpec extends Specification {
         def request = new GameCreateRequest(playerId: playerId)
 
         and: "next game id allocation fails"
-        databaseDaoMock.getNextGameId() >> { new RuntimeException("fail to allocate next game id") }
+        databaseDao.getNextGameId() >> { new RuntimeException("fail to allocate next game id") }
 
         when: "a call to create a game is made"
         testClass.create(request)
@@ -81,10 +81,10 @@ class GameServiceImplSpec extends Specification {
         def request = new GameCreateRequest(playerId: playerId)
 
         and: "next game id allocation fails"
-        databaseDaoMock.getNextGameId() >> gameId
+        databaseDao.getNextGameId() >> gameId
 
         and: "adding game to player fails"
-        playerServiceMock.addGameToPlayer((Integer) _, (Game) _) >> { new RuntimeException("fail to add game to player") }
+        playerService.addGameToPlayer((Integer) _, (Game) _) >> { new RuntimeException("fail to add game to player") }
 
         when: "a call to create a game is made"
         testClass.create(request)
@@ -99,7 +99,7 @@ class GameServiceImplSpec extends Specification {
         def gameId = 1;
 
         and: "game retrieval succeeds"
-        databaseDaoMock.getGames() >> [new Game(id: 3), new Game(id: 4), new Game(id: 1)]
+        databaseDao.getGames() >> [new Game(id: 3), new Game(id: 4), new Game(id: 1)]
 
         when: "a request to retrieve the game by the id"
         def result = testClass.getById(gameId)
@@ -113,7 +113,7 @@ class GameServiceImplSpec extends Specification {
         def gameId = 1;
 
         and: "game retrieval succeeds"
-        databaseDaoMock.getGames() >> [new Game(id: 3), new Game(id: 4), new Game(id: 11)]
+        databaseDao.getGames() >> [new Game(id: 3), new Game(id: 4), new Game(id: 11)]
 
         when: "a request to retrieve the game by the id"
         testClass.getById(gameId)
@@ -124,7 +124,7 @@ class GameServiceImplSpec extends Specification {
     }
 
     def "guess - when correct guess then return game status won"() {
-        given:
+        given: "a game id, a player id and a target number"
         def gameId = 1
         def playerId = 100
         def target = 44
@@ -138,13 +138,13 @@ class GameServiceImplSpec extends Specification {
                 guesses: [new Guess()],
                 attempts: 1)
 
-        and:
-        databaseDaoMock.getGames() >> [new Game(id: 3), new Game(id: 4), game]
+        and: "a list of games"
+        databaseDao.getGames() >> [new Game(id: 3), new Game(id: 4), game]
 
-        when:
+        when: "a correct guess request is sent"
         def result = testClass.guess(guessRequest)
 
-        then:
+        then: "the game ends successfully with game status won"
         result.message == GameStatus.WON.message
         result.status == GameStatus.WON.status
         game.totalScore == 11
@@ -158,7 +158,7 @@ class GameServiceImplSpec extends Specification {
     }
 
     def "guess - when wrong guess then return game status in progress"() {
-        given:
+        given: "a game id, a player id and a target number"
         def gameId = 1
         def playerId = 100
         def target = 44
@@ -172,13 +172,13 @@ class GameServiceImplSpec extends Specification {
                 guesses: [new Guess()],
                 attempts: 1)
 
-        and:
-        databaseDaoMock.getGames() >> [new Game(id: 3), new Game(id: 4), game]
+        and: "a list of games"
+        databaseDao.getGames() >> [new Game(id: 3), new Game(id: 4), game]
 
-        when:
+        when: "an incorrect guess request is sent"
         def result = testClass.guess(guessRequest)
 
-        then:
+        then: "game does not end and game status remains in progress"
         result.message == GameStatus.IN_PROGRESS.message
         result.status == GameStatus.IN_PROGRESS.status
         game.totalScore == 2
@@ -191,7 +191,7 @@ class GameServiceImplSpec extends Specification {
     }
 
     def "guess - when third & final guess is wrong then return game status lost"() {
-        given:
+        given: "a game id, a player id and a target number"
         def gameId = 1
         def playerId = 100
         def target = 44
@@ -205,13 +205,13 @@ class GameServiceImplSpec extends Specification {
                 guesses: [new Guess(), new Guess()],
                 attempts: 2)
 
-        and:
-        databaseDaoMock.getGames() >> [new Game(id: 3), new Game(id: 4), game]
+        and: "a list of games"
+        databaseDao.getGames() >> [new Game(id: 3), new Game(id: 4), game]
 
-        when:
+        when: " a final guess request is sent"
         def result = testClass.guess(guessRequest)
 
-        then:
+        then: " game ends unsuccessfully with game status lost"
         result.message == GameStatus.LOST.message
         result.status == GameStatus.LOST.status
         game.totalScore == 3
@@ -224,7 +224,7 @@ class GameServiceImplSpec extends Specification {
     }
 
     def "guess - when guess with invalid game id send then should throw GuessTheNumberException"() {
-        given:
+        given: "an invalid game id, a player id and a target number"
         def gameId = 1
         def playerId = 100
         def target = 44
@@ -238,19 +238,19 @@ class GameServiceImplSpec extends Specification {
                 guesses: [new Guess(), new Guess()],
                 attempts: 2)
 
-        and:
-        databaseDaoMock.getGames() >> [new Game(id: 3), new Game(id: 4), game]
+        and: "a list of games excluding the game with invalid supplied game id"
+        databaseDao.getGames() >> [new Game(id: 3), new Game(id: 4), game]
 
-        when:
+        when: "a guess request is sent"
         testClass.guess(guessRequest)
 
-        then:
+        then: "a GuessTheNumber exception is thrown"
         def ex = thrown(GuessTheNumberException)
         ex.message == "Failed to retrieve game with id: " + 99
     }
 
     def "guess - when guess with invalid player id send then should throw GuessTheNumberException"() {
-        given:
+        given: "a game id, an invalid player id and a target number"
         def gameId = 1
         def playerId = 100
         def target = 44
@@ -264,19 +264,19 @@ class GameServiceImplSpec extends Specification {
                 guesses: [new Guess(), new Guess()],
                 attempts: 2)
 
-        and:
-        databaseDaoMock.getGames() >> [new Game(id: 3), new Game(id: 4), game]
+        and: "a list of games excluding the game with invalid player id supplied"
+        databaseDao.getGames() >> [new Game(id: 3), new Game(id: 4), game]
 
-        when:
+        when: "a guess request is sent"
         testClass.guess(guessRequest)
 
-        then:
+        then: "a GuessTheNumber exception is thrown"
         def ex = thrown(GuessTheNumberException)
         ex.message == "Failed to update game due to invalid data provided"
     }
 
     def "guess - when guess send for finished game then should throw GuessTheNumberException"() {
-        given:
+        given: "a game id, an player id and a target number"
         def gameId = 1
         def playerId = 100
         def target = 44
@@ -290,19 +290,19 @@ class GameServiceImplSpec extends Specification {
                 guesses: [new Guess(), new Guess(), new Guess()],
                 attempts: 3)
 
-        and:
-        databaseDaoMock.getGames() >> [new Game(id: 3), new Game(id: 4), game]
+        and: "a list of games including the finished game with supplied game id"
+        databaseDao.getGames() >> [new Game(id: 3), new Game(id: 4), game]
 
-        when:
+        when: "a guess request is send"
         testClass.guess(guessRequest)
 
-        then:
+        then: "a GuessTheNumber exception is thrown"
         def ex = thrown(GuessTheNumberException)
         ex.message == "Game is already finished"
     }
 
     def "guess - when guess fails to update game then should throw GuessTheNumberException"() {
-        given:
+        given: "a game id, an player id and a target number"
         def gameId = 1
         def playerId = 100
         def target = 44
@@ -315,13 +315,13 @@ class GameServiceImplSpec extends Specification {
                 guesses: [new Guess(), new Guess()],
                 attempts: 2)
 
-        and:
-        databaseDaoMock.getGames() >> [new Game(id: 3), new Game(id: 4), game]
+        and: "a list of games"
+        databaseDao.getGames() >> [new Game(id: 3), new Game(id: 4), game]
 
-        when:
+        when: "a guess request is send"
         testClass.guess(guessRequest)
 
-        then:
+        then: "fails to update the game and a GuessTheNumber exception is thrown"
         def ex = thrown(GuessTheNumberException)
         ex.message == "Failed to update game for player with id: " + playerId
     }
