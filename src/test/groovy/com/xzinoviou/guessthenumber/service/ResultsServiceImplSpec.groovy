@@ -94,4 +94,63 @@ class ResultsServiceImplSpec extends Specification {
         result.totalScore == 30
         result.avgWinRatio == 0.4
     }
+
+    def "getPlayersTotalResultsRanking - return all players results ranked by wins"() {
+        given: "a list of all players"
+        playerService.getAllPlayers() >> listOfPlayers()
+
+        expect: "when a request for all players rank is sent then return result ordered by wins"
+        def result = testClass.getPlayersTotalResultsRanking()
+
+        with(result.playersResultsRanking) {
+            player ->
+                player[0].id == 1 && player[1].id == 3 && player[2].id == 2
+        }
+
+
+    }
+
+    private List<Player> listOfPlayers() {
+        return [
+                new Player(
+                        id: 1,
+                        firstName: "first_name_1",
+                        lastName: "last_name_1",
+                        dateOfBirth: Instant.now().toString(),
+                        totalGames: 5,
+                        history: [
+                                new Game(totalScore: 11, statusInfo: GameStatus.WON),
+                                new Game(totalScore: 3, statusInfo: GameStatus.LOST),
+                                new Game(totalScore: 10, statusInfo: GameStatus.WON),
+                                new Game(totalScore: 3, statusInfo: GameStatus.LOST),
+                                new Game(totalScore: 3, statusInfo: GameStatus.LOST)
+                        ]
+                ),
+                new Player(
+                        id: 2,
+                        firstName: "first_name_2",
+                        lastName: "last_name_2",
+                        dateOfBirth: Instant.now().toString(),
+                        totalGames: 2,
+                        history: [
+                                new Game(totalScore: 3, statusInfo: GameStatus.LOST),
+                                new Game(totalScore: 3, statusInfo: GameStatus.LOST),
+                        ]
+                ),
+                new Player(
+                        id: 3,
+                        firstName: "first_name_3",
+                        lastName: "last_name_3",
+                        dateOfBirth: Instant.now().toString(),
+                        totalGames: 4,
+                        history: [
+                                new Game(totalScore: 12, statusInfo: GameStatus.WON),
+                                new Game(totalScore: 3, statusInfo: GameStatus.LOST),
+                                new Game(totalScore: 11, statusInfo: GameStatus.WON),
+                                new Game(totalScore: 2, statusInfo: GameStatus.IN_PROGRESS)
+                        ]
+                )
+
+        ]
+    }
 }
