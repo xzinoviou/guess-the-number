@@ -133,3 +133,6 @@ fabric.properties
 
 ### IntelliJ web-inf
 .web/*.iml
+
+### jenv
+*.java-version
